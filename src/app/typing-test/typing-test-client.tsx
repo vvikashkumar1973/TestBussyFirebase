@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Timer, Zap, Target, RefreshCw } from 'lucide-react';
+import { Timer, Zap, Target, RefreshCw, Home } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Textarea } from '@/components/ui/textarea';
 
 
 const sampleTexts = [
@@ -17,29 +19,54 @@ const sampleTexts = [
   "Maintaining a healthy work-life balance is crucial for long-term well-being. Remember to take breaks, pursue hobbies, and spend time with loved ones."
 ];
 
+type TestStatus = 'idle' | 'typing' | 'finished';
+
 export function TypingTestClient() {
   const [duration, setDuration] = useState(60);
   const [text, setText] = useState('');
   const [userInput, setUserInput] = useState('');
   const [timeLeft, setTimeLeft] = useState(duration);
-  const [isTyping, setIsTyping] = useState(false);
+  const [status, setStatus] = useState<TestStatus>('idle');
   const [wpm, setWpm] = useState(0);
-  const [accuracy, setAccuracy] = useState(100);
+  const [accuracy, setAccuracy] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const timerId = useRef<NodeJS.Timeout | null>(null);
 
+  const calculateMetrics = useCallback(() => {
+    const typedChars = userInput.trim().length;
+    if (typedChars === 0) {
+      setWpm(0);
+      setAccuracy(0);
+      return;
+    }
+
+    const timeElapsed = duration - timeLeft;
+    const wordsTyped = (typedChars / 5);
+    const currentWpm = timeElapsed > 0 ? (wordsTyped / timeElapsed) * 60 : 0;
+    
+    let correctChars = 0;
+    const cleanText = text.trim();
+    userInput.trim().split('').forEach((char, index) => {
+        if(cleanText[index] === char) {
+            correctChars++;
+        }
+    });
+
+    setWpm(Math.round(currentWpm));
+    setAccuracy(Math.round((correctChars / typedChars) * 100));
+  }, [duration, timeLeft, userInput, text]);
+
   const endTest = useCallback(() => {
     if (timerId.current) clearInterval(timerId.current);
-    setIsTyping(false);
-    calculateMetrics(true);
-  }, [timerId, duration, userInput, text]);
-
+    setStatus('finished');
+    calculateMetrics();
+  }, [timerId, calculateMetrics]);
 
   const startTest = () => {
-    resetTest(false);
+    resetTest();
     const newText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
     setText(newText);
-    setIsTyping(true);
+    setStatus('typing');
     inputRef.current?.focus();
 
     if (timerId.current) clearInterval(timerId.current);
@@ -54,14 +81,14 @@ export function TypingTestClient() {
     }, 1000);
   };
   
-  const resetTest = (clearText = true) => {
+  const resetTest = () => {
     if (timerId.current) clearInterval(timerId.current);
-    setIsTyping(false);
+    setStatus('idle');
     setTimeLeft(duration);
     setUserInput('');
-    if (clearText) setText('');
+    setText('');
     setWpm(0);
-    setAccuracy(100);
+    setAccuracy(0);
   };
 
   useEffect(() => {
@@ -71,69 +98,40 @@ export function TypingTestClient() {
   }, []);
   
   useEffect(() => {
-    if(!isTyping) {
+    if(status !== 'typing') {
         setTimeLeft(duration);
     }
-  }, [duration, isTyping]);
+  }, [duration, status]);
   
-  const calculateMetrics = (isFinished = false) => {
-    const typedChars = userInput.length;
-    if (typedChars === 0) {
-      setWpm(0);
-      setAccuracy(100);
-      return;
-    }
-
-    const timeElapsed = isFinished ? duration : duration - timeLeft;
-    const wordsTyped = (typedChars / 5);
-    const currentWpm = timeElapsed > 0 ? (wordsTyped / timeElapsed) * 60 : 0;
-    setWpm(Math.round(currentWpm));
-    
-    let correctChars = 0;
-    userInput.split('').forEach((char, index) => {
-        if(text[index] === char) {
-            correctChars++;
-        }
-    });
-    setAccuracy(Math.round((correctChars / typedChars) * 100));
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (!isTyping) return;
-    const newTypedText = e.target.value;
+    if (status !== 'typing') return;
     
+    const newTypedText = e.target.value;
+    setUserInput(newTypedText);
+
     if (newTypedText.length >= text.length) {
-      setUserInput(text);
       endTest();
-    } else {
-      setUserInput(newTypedText);
     }
   };
-  
-  useEffect(() => {
-    if (isTyping) {
-      calculateMetrics();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInput, isTyping, timeLeft]);
-
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-lg">
       <CardContent className="p-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-center">
-            <StatCard icon={Timer} label="Time Left" value={`${timeLeft}s`} />
-            <StatCard icon={Zap} label="Speed (WPM)" value={wpm} />
-            <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} />
-             <div className="flex items-center justify-center">
-                <Button onClick={isTyping ? () => resetTest(true) : startTest} className="w-full md:w-auto" variant={isTyping ? "destructive" : "default"}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    {isTyping ? 'Reset' : text ? 'Restart' : 'Start'}
-                </Button>
+            <StatCard icon={Timer} label="Time" value={`${timeLeft}s`} />
+            <StatCard icon={Zap} label="Speed (WPM)" value={wpm} hidden={status !== 'finished'} />
+            <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} hidden={status !== 'finished'} />
+            <div className={cn("flex items-center justify-center", status === 'finished' && "md:col-start-4")}>
+                {status !== 'finished' && (
+                    <Button onClick={status === 'typing' ? resetTest : startTest} className="w-full md:w-auto" variant={status === 'typing' ? "destructive" : "default"}>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        {status === 'typing' ? 'Reset' : 'Start'}
+                    </Button>
+                )}
             </div>
         </div>
         
-        {(!isTyping && !text) && (
+        {status === 'idle' && (
              <div className="flex flex-col items-center justify-center p-8 space-y-4">
                  <p className="text-muted-foreground">Select a test duration and click Start.</p>
                  <RadioGroup defaultValue="60" onValueChange={(val) => setDuration(parseInt(val))} className="flex space-x-4">
@@ -157,32 +155,54 @@ export function TypingTestClient() {
             </div>
         )}
 
-        {text && (
-            <div className="relative">
-                <div
-                    className={cn(
-                        "text-2xl leading-relaxed tracking-wider p-4 rounded-md bg-muted select-none",
-                         !isTyping && text.length > 0 && "opacity-50"
-                    )}
-                >
-                    {text.split('').map((char, index) => (
-                    <span key={index} className={cn({
-                        'text-green-500': index < userInput.length && char === userInput[index],
-                        'text-red-500 bg-red-500/10': index < userInput.length && char !== userInput[index],
-                        'text-muted-foreground': index >= userInput.length
-                    })}>
-                        {char}
-                    </span>
-                    ))}
+        {status === 'typing' && (
+            <div className="space-y-4">
+                 <div className="text-xl leading-relaxed tracking-wider p-4 rounded-md bg-muted select-none">
+                    {text}
                 </div>
-                <textarea
+                <Textarea
                     ref={inputRef}
                     value={userInput}
                     onChange={handleInputChange}
-                    className="absolute inset-0 w-full h-full p-4 bg-transparent text-transparent caret-primary resize-none border-none focus:outline-none text-2xl leading-relaxed tracking-wider"
-                    disabled={!isTyping}
+                    className="text-xl leading-relaxed tracking-wider"
+                    rows={5}
+                    placeholder="Start typing here..."
                     aria-label="Typing input"
                 />
+            </div>
+        )}
+
+        {status === 'finished' && (
+            <div className="text-center p-8">
+                <h2 className="text-2xl font-bold font-headline mb-4">Test Complete!</h2>
+                <div className="flex justify-center gap-8 mb-8">
+                     <div className="p-4 bg-secondary/50 rounded-lg">
+                        <div className="flex items-center justify-center space-x-2">
+                            <Zap className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-muted-foreground">Speed (WPM)</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-1">{wpm}</p>
+                    </div>
+                     <div className="p-4 bg-secondary/50 rounded-lg">
+                        <div className="flex items-center justify-center space-x-2">
+                            <Target className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-muted-foreground">Accuracy</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-1">{accuracy}%</p>
+                    </div>
+                </div>
+                <div className="flex justify-center gap-4">
+                    <Button onClick={startTest}>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Restart
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href="/">
+                            <Home className="mr-2 h-4 w-4" />
+                            Home
+                        </Link>
+                    </Button>
+                </div>
             </div>
         )}
       </CardContent>
@@ -190,7 +210,8 @@ export function TypingTestClient() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | number }) {
+function StatCard({ icon: Icon, label, value, hidden = false }: { icon: React.ElementType, label: string, value: string | number, hidden?: boolean }) {
+  if (hidden) return <div className="hidden md:block"></div>;
   return (
     <div className="p-4 bg-secondary/50 rounded-lg">
       <div className="flex items-center justify-center space-x-2">
