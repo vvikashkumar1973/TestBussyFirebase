@@ -1,0 +1,261 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the TestBuddy.in platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "login": {
+          "type": "string",
+          "description": "User's login username or email."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "examIds": {
+          "type": "array",
+          "description": "References to Exams the user is preparing for. (Relationship: User 1:N Exam)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "login"
+      ]
+    },
+    "Exam": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Exam",
+      "type": "object",
+      "description": "Represents an exam available on the platform (e.g., SSC, Railways, Banking).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Exam entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the exam (e.g., SSC CGL)."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the exam."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Round": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Round",
+      "type": "object",
+      "description": "Represents a round within an exam.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Round entity."
+        },
+        "examId": {
+          "type": "string",
+          "description": "Reference to the Exam this round belongs to. (Relationship: Exam 1:N Round)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name or identifier for the round (e.g., 'Preliminary', 'Tier 1')."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Pattern for questions format in Round."
+        }
+      },
+      "required": [
+        "id",
+        "examId",
+        "name"
+      ]
+    },
+    "Question": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Question",
+      "type": "object",
+      "description": "Represents a question in a mock test or exam.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Question entity."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text of the question."
+        },
+        "options": {
+          "type": "array",
+          "description": "Array of options for the question.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "correctAnswer": {
+          "type": "string",
+          "description": "The correct answer for the question."
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "options",
+        "correctAnswer"
+      ]
+    },
+    "TestResult": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TestResult",
+      "type": "object",
+      "description": "Represents the result of a test taken by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the TestResult entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who took the test. (Relationship: User 1:N TestResult)"
+        },
+        "examId": {
+          "type": "string",
+          "description": "Reference to the Exam for which the test was taken. (Relationship: Exam 1:N TestResult)"
+        },
+        "roundId": {
+          "type": "string",
+          "description": "Reference to the Round of the exam (Relationship: Round 1:N TestResult)"
+        },
+        "score": {
+          "type": "number",
+          "description": "The score obtained in the test."
+        },
+        "dateTaken": {
+          "type": "string",
+          "description": "The date and time when the test was taken.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "examId",
+        "score",
+        "dateTaken"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  Owned by the user (path-based ownership).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/exams/{examId}",
+        "definition": {
+          "entityName": "Exam",
+          "schema": {
+            "$ref": "#/backend/entities/Exam"
+          },
+          "description": "Stores information about available exams.",
+          "params": [
+            {
+              "name": "examId",
+              "description": "The unique identifier of the exam."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/exams/{examId}/rounds/{roundId}",
+        "definition": {
+          "entityName": "Round",
+          "schema": {
+            "$ref": "#/backend/entities/Round"
+          },
+          "description": "Stores information about rounds within a particular exam.",
+          "params": [
+            {
+              "name": "examId",
+              "description": "The unique identifier of the exam."
+            },
+            {
+              "name": "roundId",
+              "description": "The unique identifier of the round."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/questions/{questionId}",
+        "definition": {
+          "entityName": "Question",
+          "schema": {
+            "$ref": "#/backend/entities/Question"
+          },
+          "description": "Stores questions available for mock tests and exams.",
+          "params": [
+            {
+              "name": "questionId",
+              "description": "The unique identifier of the question."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/testResults/{testResultId}",
+        "definition": {
+          "entityName": "TestResult",
+          "schema": {
+            "$ref": "#/backend/entities/TestResult"
+          },
+          "description": "Stores test results for each user. Owned by the user (path-based ownership).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "testResultId",
+              "description": "The unique identifier of the test result."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to be secure, scalable, and easily debuggable, following the principles of Authorization Independence, Clarity of Intent, and DBAC. It leverages denormalization and structural segregation to simplify security rules and enable secure list operations. The design adheres to a consistent access modeling pattern, utilizing path-based ownership for user-owned data and membership maps for collaborative data.\n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. This is accomplished through denormalizing authorization context where necessary. For example, any data nested under `/users/{userId}` is implicitly authorized to that user, eliminating the need to fetch user data in rules. For collaborative data (if it existed), a membership map (`members: {uid1: \"role\", uid2: \"role\"}`) would be denormalized into relevant documents.\n\nStructural Segregation ensures that all documents within a collection share the same security requirements. This is achieved by separating data with different access needs into different collections, simplifying rules and improving security.\n\nQAPs (Rules are not Filters) are supported by structuring data in a way that allows secure `list` operations. Path-based ownership (e.g., `/users/{userId}/testResults/{testResultId}`) inherently supports secure listing of a user's own data.\n\nThe structure also maintains invariants, such as ownership, timestamps, and denormalized data, by enforcing strict naming conventions and predictable schemas."
+  }
+}
