@@ -9,7 +9,7 @@ import { Timer, Zap, Target, RefreshCw, Home } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Textarea } from '@/components/ui/textarea';
-
+import { PerformanceHistory } from './performance-history';
 
 const sampleTexts = [
   "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet. Typing it is a good way to practice.",
@@ -21,6 +21,15 @@ const sampleTexts = [
 
 type TestStatus = 'idle' | 'typing' | 'finished';
 
+export type TypingPerformance = {
+  wpm: number;
+  accuracy: number;
+  duration: number;
+  date: string;
+};
+
+const LS_PERF_KEY = 'typingPerformanceHistory';
+
 export function TypingTestClient() {
   const [duration, setDuration] = useState(60);
   const [text, setText] = useState('');
@@ -29,15 +38,35 @@ export function TypingTestClient() {
   const [status, setStatus] = useState<TestStatus>('idle');
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
+  const [performanceHistory, setPerformanceHistory] = useState<TypingPerformance[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const timerId = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    try {
+      const storedHistory = localStorage.getItem(LS_PERF_KEY);
+      if (storedHistory) {
+        setPerformanceHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error("Could not load performance history from localStorage", error);
+    }
+  }, []);
+
+  const savePerformance = (newPerf: TypingPerformance) => {
+    try {
+      const updatedHistory = [newPerf, ...performanceHistory].slice(0, 10);
+      setPerformanceHistory(updatedHistory);
+      localStorage.setItem(LS_PERF_KEY, JSON.stringify(updatedHistory));
+    } catch (error) {
+        console.error("Could not save performance history to localStorage", error);
+    }
+  };
 
   const calculateMetrics = useCallback(() => {
     const typedChars = userInput.trim().length;
     if (typedChars === 0) {
-      setWpm(0);
-      setAccuracy(0);
-      return;
+      return { wpm: 0, accuracy: 0 };
     }
 
     const timeElapsed = duration - timeLeft;
@@ -51,16 +80,29 @@ export function TypingTestClient() {
             correctChars++;
         }
     });
-
-    setWpm(Math.round(currentWpm));
-    setAccuracy(Math.round((correctChars / typedChars) * 100));
+    
+    const finalWpm = Math.round(currentWpm);
+    const finalAccuracy = Math.round((correctChars / typedChars) * 100);
+    
+    setWpm(finalWpm);
+    setAccuracy(finalAccuracy);
+    
+    return { wpm: finalWpm, accuracy: finalAccuracy };
   }, [duration, timeLeft, userInput, text]);
 
   const endTest = useCallback(() => {
     if (timerId.current) clearInterval(timerId.current);
     setStatus('finished');
-    calculateMetrics();
-  }, [timerId, calculateMetrics]);
+    const { wpm, accuracy } = calculateMetrics();
+    if(wpm > 0) {
+        savePerformance({
+            wpm,
+            accuracy,
+            duration,
+            date: new Date().toISOString(),
+        });
+    }
+  }, [calculateMetrics, duration, savePerformance]);
 
   const startTest = () => {
     resetTest();
@@ -133,25 +175,28 @@ export function TypingTestClient() {
         
         {status === 'idle' && (
              <div className="flex flex-col items-center justify-center p-8 space-y-4">
-                 <p className="text-muted-foreground">Select a test duration and click Start.</p>
-                 <RadioGroup defaultValue="60" onValueChange={(val) => setDuration(parseInt(val))} className="flex space-x-4">
-                     <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="30" id="t30" />
-                        <Label htmlFor="t30">30s</Label>
-                    </div>
-                     <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="60" id="t60" />
-                        <Label htmlFor="t60">1 min</Label>
-                    </div>
-                     <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="120" id="t120" />
-                        <Label htmlFor="t120">2 min</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="300" id="t300" />
-                        <Label htmlFor="t300">5 min</Label>
-                    </div>
-                 </RadioGroup>
+                 <div className='flex flex-col items-center justify-center space-y-4 text-center'>
+                    <p className="text-muted-foreground">Select a test duration and click Start.</p>
+                    <RadioGroup defaultValue="60" onValueChange={(val) => setDuration(parseInt(val))} className="flex space-x-4">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="30" id="t30" />
+                            <Label htmlFor="t30">30s</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="60" id="t60" />
+                            <Label htmlFor="t60">1 min</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="120" id="t120" />
+                            <Label htmlFor="t120">2 min</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="300" id="t300" />
+                            <Label htmlFor="t300">5 min</Label>
+                        </div>
+                    </RadioGroup>
+                </div>
+                {performanceHistory.length > 0 && <PerformanceHistory history={performanceHistory} />}
             </div>
         )}
 
