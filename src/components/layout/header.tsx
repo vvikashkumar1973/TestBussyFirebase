@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpenCheck } from 'lucide-react';
+import { Menu, BookOpenCheck, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth, useUser } from '@/firebase';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -17,6 +18,12 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    auth.signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -46,12 +53,26 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/signup">Sign Up</Link>
-            </Button>
+            {isUserLoading ? (
+              <p>Loading...</p>
+            ) : user ? (
+              <>
+                <span className='text-sm text-muted-foreground'>Hi, {user.email}</span>
+                <Button variant="ghost" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Navigation */}
@@ -78,12 +99,25 @@ export function Header() {
                     </Link>
                   ))}
                   <div className="flex flex-col space-y-2 pt-4">
-                     <Button variant="ghost" asChild>
-                       <Link href="/login">Login</Link>
-                     </Button>
-                     <Button asChild>
-                       <Link href="/signup">Sign Up</Link>
-                     </Button>
+                    {isUserLoading ? (
+                      <p>Loading...</p>
+                    ) : user ? (
+                      <>
+                        <span className='text-sm text-muted-foreground p-2'>{user.email}</span>
+                        <Button variant="ghost" onClick={handleLogout}>
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" asChild>
+                          <Link href="/login">Login</Link>
+                        </Button>
+                        <Button asChild>
+                          <Link href="/signup">Sign Up</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>

@@ -10,6 +10,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Textarea } from '@/components/ui/textarea';
 import { PerformanceHistory } from './performance-history';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+
 
 const sampleTexts = [
   "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet. Typing it is a good way to practice.",
@@ -38,28 +42,47 @@ export function TypingTestClient() {
   const [status, setStatus] = useState<TestStatus>('idle');
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const [performanceHistory, setPerformanceHistory] = useState<TypingPerformance[]>([]);
+  const [localHistory, setLocalHistory] = useState<TypingPerformance[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const timerId = useRef<NodeJS.Timeout | null>(null);
 
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const typingResultsCollection = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return collection(firestore, 'users', user.uid, 'typing-results');
+  }, [user, firestore]);
+
+  const { data: firestoreHistory } = useCollection<TypingPerformance>(typingResultsCollection);
+
+  const performanceHistory = firestoreHistory || localHistory;
+
+
   useEffect(() => {
-    try {
-      const storedHistory = localStorage.getItem(LS_PERF_KEY);
-      if (storedHistory) {
-        setPerformanceHistory(JSON.parse(storedHistory));
-      }
-    } catch (error) {
-      console.error("Could not load performance history from localStorage", error);
+    if (!user) {
+        try {
+            const storedHistory = localStorage.getItem(LS_PERF_KEY);
+            if (storedHistory) {
+                setLocalHistory(JSON.parse(storedHistory));
+            }
+        } catch (error) {
+            console.error("Could not load performance history from localStorage", error);
+        }
     }
-  }, []);
+  }, [user]);
 
   const savePerformance = (newPerf: TypingPerformance) => {
-    try {
-      const updatedHistory = [newPerf, ...performanceHistory].slice(0, 10);
-      setPerformanceHistory(updatedHistory);
-      localStorage.setItem(LS_PERF_KEY, JSON.stringify(updatedHistory));
-    } catch (error) {
-        console.error("Could not save performance history to localStorage", error);
+    if (user && typingResultsCollection) {
+      addDocumentNonBlocking(typingResultsCollection, newPerf);
+    } else {
+        try {
+          const updatedHistory = [newPerf, ...localHistory].slice(0, 10);
+          setLocalHistory(updatedHistory);
+          localStorage.setItem(LS_PERF_KEY, JSON.stringify(updatedHistory));
+        } catch (error) {
+            console.error("Could not save performance history to localStorage", error);
+        }
     }
   };
 
@@ -196,7 +219,7 @@ export function TypingTestClient() {
                         </div>
                     </RadioGroup>
                 </div>
-                {performanceHistory.length > 0 && <PerformanceHistory history={performanceHistory} />}
+                {performanceHistory && performanceHistory.length > 0 && <PerformanceHistory history={performanceHistory} />}
             </div>
         )}
 
