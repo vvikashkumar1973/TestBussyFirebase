@@ -1,3 +1,94 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Students studying for exams",
+      "imageUrl": "https://images.unsplash.com/photo-1620829813573-7c9e1877706f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzdHVkZW50cyUyMHN0dWR5aW5nfGVufDB8fHx8MTc2MDc0Mjc1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "students studying"
+    },
+    {
+      "id": "ssc-category",
+      "description": "Books in a library representing SSC exams",
+      "imageUrl": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bGlicmFyeSUyMGJvb2tzfGVufDB8fHx8MTc2MDczMTE3OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "library books"
+    },
+    {
+      "id": "banking-category",
+      "description": "A modern bank building",
+      "imageUrl": "https://images.unsplash.com/photo-1617664837373-f107dd7be738?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiYW5rJTIwYnVpbGRpbmd8ZW58MHx8fHwxNzYwNzc2MTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bank building"
+    },
+    {
+      "id": "railways-category",
+      "description": "A train at a station",
+      "imageUrl": "https://images.unsplash.com/photo-1495313196544-7d1adf4e628f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx0cmFpbiUyMHN0YXRpb258ZW58MHx8fHwxNzYwNzQxNjcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "train station"
+    },
+    {
+      "id": "other-govt-category",
+      "description": "A government building",
+      "imageUrl": "https://images.unsplash.com/photo-1496144300411-8dd31ce145ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxnb3Zlcm5tZW50JTIwYnVpbGRpbmd8ZW58MHx8fHwxNzYwNzMxOTM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "government building"
+    },
+    {
+      "id": "testimonial-priya",
+      "description": "Portrait of an Indian woman",
+      "imageUrl": "https://images.unsplash.com/photo-1739429942851-9083ee185d3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxpbmRpYW4lMjB3b21hbnxlbnwwfHx8fDE3NjA3NDgzMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian woman"
+    },
+    {
+      "id": "testimonial-rahul",
+      "description": "Portrait of an Indian man",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1571367034861-e6729ad9c2d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjBtYW58ZW58MHx8fHwxNzYwNzQ4MzI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian man"
+    },
+    {
+      "id": "testimonial-anjali",
+      "description": "Portrait of a smiling student",
+      "imageUrl": "https://images.unsplash.com/photo-1701980889802-55ff39e2e973?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxzbWlsaW5nJTIwc3R1ZGVudHxlbnwwfHx8fDE3NjA3NTY4NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smiling student"
+    },
+    {
+      "id": "exam-ssc-cgl",
+      "description": "An exam paper on a desk",
+      "imageUrl": "https://images.unsplash.com/photo-1532153955177-f59af40d6472?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxleGFtJTIwcGFwZXJ8ZW58MHx8fHwxNzYwNzc2MTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "exam paper"
+    },
+    {
+      "id": "exam-ibps-po",
+      "description": "Interior of a bank",
+      "imageUrl": "https://images.unsplash.com/photo-1685111674777-25bcc8ab3b5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxiYW5rJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzYwNzc2MTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bank interior"
+    },
+    {
+      "id": "exam-rrb-ntpc",
+      "description": "Railway tracks stretching into the distance",
+      "imageUrl": "https://images.unsplash.com/photo-1710113964097-46e3b6a73426?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cmFpbHdheSUyMHRyYWNrfGVufDB8fHx8MTc2MDc3NjE4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "railway track"
+    },
+    {
+      "id": "exam-ssc-chsl",
+      "description": "An English dictionary open to a page",
+      "imageUrl": "https://images.unsplash.com/photo-1706628099052-94eb198b8416?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxlbmdsaXNoJTIwZGljdGlvbmFyeXxlbnwwfHx8fDE3NjA3NzYxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "english dictionary"
+    },
+    {
+      "id": "exam-sbi-clerk",
+      "description": "Jigsaw puzzle pieces",
+      "imageUrl": "https://images.unsplash.com/photo-1730804518415-75297e8d2a41?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwdXp6bGUlMjBwaWVjZXN8ZW58MHx8fHwxNzYwNzc2MTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "puzzle pieces"
+    },
+    {
+      "id": "exam-up-police",
+      "description": "A police officer's cap",
+      "imageUrl": "https://images.unsplash.com/photo-1682623764613-4f142bfd9747?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwb2xpY2UlMjBjYXB8ZW58MHx8fHwxNzYwNzc2MTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "police cap"
+    },
+    {
+      "id": "about-hero",
+      "description": "A team of people working together in a meeting",
+      "imageUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx0ZWFtJTIwbWVldGluZ3xlbnwwfHx8fDE3NjA3MzExMzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team meeting"
+    }
+  ]
 }
